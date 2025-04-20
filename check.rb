@@ -5,7 +5,7 @@ require 'set'
 instances_dir = Pathname.new("instances")
 qplib_instances_dir = Pathname.new("qplib/html/qplib")
 
-header = ["name", "QPLIB link", "problem type in QPLIB", "#variable", "#constraint", "#equal", "intsize", "product", "sizeproduct", "objective function scale factor"]
+header = ["name", "QPLIB link", "problem type in QPLIB", "#variable", "#constraint", "intsize", "objective function scale factor"]
 rows = []
 types = Set.new
 
@@ -40,9 +40,11 @@ instances_dir.glob("*.opb").sort_by { |path_opb|
   
   File.open(path_opb) { |f|
     ws = f.gets.sub(/^* /, '').split
-    1.step(ws.size, 2) { |i|
-      row << ws[i]
-    }
+    row.append([
+      ws[1], # #variable
+      ws[3], # #constraint
+      ws[7], # intsize
+    ])
   }
 
   json = JSON.parse((instances_dir / "#{name}.json").read())
@@ -59,7 +61,7 @@ instances_dir.glob("*.opb").sort_by { |path_opb|
 puts "converted problem types: #{types.to_a.join(", ")}"
 puts ""
 puts("|" + header.join("|") + "|")
-puts("|" + ["-", "-", "-", "-:", "-:", "-:", "-:", "-:", "-:", "-:"].join("|") + "|")
+puts("|" + ["-", "-", "-", "-:", "-:", "-:", "-:"].join("|") + "|")
 rows.each { |row|
   puts("|" + row.join("|") + "|")
 }
